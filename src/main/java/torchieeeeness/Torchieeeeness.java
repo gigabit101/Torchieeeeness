@@ -6,6 +6,7 @@ import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.common.MinecraftForge;
 import torchieeeeness.lib.ModInfo;
+import torchieeeeness.network.PacketHandler;
 
 @Mod(name = ModInfo.MOD_NAME, modid = ModInfo.MOD_ID, version = ModInfo.MOD_VERSION)
 public class Torchieeeeness 
@@ -23,5 +24,7 @@ public class Torchieeeeness
 		MinecraftForge.EVENT_BUS.register(new TorchEventHandler());
 		// Register keybindings on the client side only
 		proxy.registerKeybindings();
+		// Register packet handler
+		PacketHandler.init();
 	}
 }

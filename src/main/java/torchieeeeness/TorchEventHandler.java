@@ -12,6 +12,8 @@ import net.minecraft.util.StatCollector;
 import net.minecraftforge.event.entity.item.ItemEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.Action;
+import torchieeeeness.network.MessageSettings;
+import torchieeeeness.network.PacketHandler;
 
 import static net.minecraftforge.event.entity.player.PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK;
 
@@ -32,44 +34,47 @@ import cpw.mods.fml.relauncher.SideOnly;
 public class TorchEventHandler 
 {
     private int[] slots = {8, 2, 3, 4, 5, 6, 7, 8, -1};
-	public static TorchieeeenessSettings torchieeeenessSettings;
+//	public static TorchieeeenessSettings torchieeeenessSettings;
 	public static KeyBindings key;
-	private static File TorchieeeenessSettingsFile; //= new File(Minecraft.getMinecraft().mcDataDir, "TorchieeeenessSettings");
-	
-	public void generateJson()
-	{
-		if(Minecraft.getMinecraft() != null)
-		{
-			TorchieeeenessSettingsFile = new File(Minecraft.getMinecraft().mcDataDir, "TorchieeeenessSettings");
-		}
-	}
+//	private static File TorchieeeenessSettingsFile; //= new File(Minecraft.getMinecraft().mcDataDir, "TorchieeeenessSettings");
+	public static int serverSetting;
+	public int clientSetting;
 	
     @SubscribeEvent
     public void playerInteractEventHandler(PlayerInteractEvent event)
     {
-		generateJson();
-    	if(event.world.isRemote)
-    	{
+//    	if(event.world.isRemote)
+//    	{
+    		//generate the json file
+//    		generateJson();
+    		// get players held item
         	ItemStack heldItem = event.entityPlayer.inventory.getCurrentItem();
-        																
-        	if (key.config.isPressed() && event.action == Action.RIGHT_CLICK_AIR)
+        	//Toggle mode on key press
+        	if(event.world.isRemote)
         	{
-        		load();
-        		if(torchieeeenessSettings.settings != 3)
-        			torchieeeenessSettings.settings++;
-        		if(torchieeeenessSettings.settings >= 3)
-        			torchieeeenessSettings.settings = 0;
-        		event.entityPlayer.addChatMessage(new ChatComponentText(StatCollector.translateToLocal("torchieeeeness_key" + torchieeeenessSettings.settings)));
-        		save();
-        	}
-        	if(torchieeeenessSettings.settings != 0)
-        	{
-        		if(torchieeeenessSettings.settings == 1)
-        			placeAnything(event);
-        		if(torchieeeenessSettings.settings == 2)
-        			placeOnlyTorchs(event);
-        	} 	
+        		if (event.action == Action.RIGHT_CLICK_AIR && key.config.isPressed())
+        		{
+        			//Load the json file
+//        			load();
+        			if(clientSetting != 3)
+        				clientSetting++;
+        			if(clientSetting >= 3)
+        				clientSetting = 0;
+        			event.entityPlayer.addChatMessage(new ChatComponentText(StatCollector.translateToLocal("torchieeeeness_key" + clientSetting)));
+        			// Save the json file
+//        			save();
+                    PacketHandler.INSTANCE.sendToServer(new MessageSettings(clientSetting));
+        		}
+//        	}
     	}
+
+        if(serverSetting != 0)
+        {
+        	if(serverSetting == 1)
+        		placeAnything(event);
+        	if(serverSetting == 2)
+        		placeOnlyTorchs(event);
+        }
     }
     
     public void placeOnlyTorchs(PlayerInteractEvent event)
@@ -116,47 +121,44 @@ public class TorchEventHandler
         // Prevent derpy doors
         event.setCanceled(true);
     }
-    
-	public static class TorchieeeenessSettings
-	{
-		public boolean placeOnlyTorchs = false;
-		public boolean placeAnything = true;
-		public boolean disable = false;
-		public int settings = 1;
-	}
-	
-	// load form Json
-	public static void load()
-	{
-		if(!TorchieeeenessSettingsFile.exists())
-		{
-			torchieeeenessSettings = new TorchieeeenessSettings();
-		} else 
-		{
-			try 
-			{
-				Gson gson = new Gson();
-				BufferedReader reader = new BufferedReader(new FileReader(TorchieeeenessSettingsFile));
-				torchieeeenessSettings = gson.fromJson(reader, TorchieeeenessSettings.class);
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-				torchieeeenessSettings = new TorchieeeenessSettings();
-			}
-		}
-	}
-	
-	// Save to Json
-	public static void save()
-	{
-		Gson gson = new GsonBuilder().setPrettyPrinting().create();
-		String json = gson.toJson(torchieeeenessSettings);
-		try 
-		{
-			FileWriter writer = new FileWriter(TorchieeeenessSettingsFile);
-			writer.write(json);
-			writer.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+    //TODO add this back 
+//	public static class TorchieeeenessSettings
+//	{
+//		public int settings = 1;
+//	}
+//	
+//	// load form Json
+//	public static void load()
+//	{
+//		if(!TorchieeeenessSettingsFile.exists())
+//		{
+//			torchieeeenessSettings = new TorchieeeenessSettings();
+//		} else 
+//		{
+//			try 
+//			{
+//				Gson gson = new Gson();
+//				BufferedReader reader = new BufferedReader(new FileReader(TorchieeeenessSettingsFile));
+//				torchieeeenessSettings = gson.fromJson(reader, TorchieeeenessSettings.class);
+//			} catch (FileNotFoundException e) {
+//				e.printStackTrace();
+//				torchieeeenessSettings = new TorchieeeenessSettings();
+//			}
+//		}
+//	}
+//	
+//	// Save to Json
+//	public static void save()
+//	{
+//		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+//		String json = gson.toJson(torchieeeenessSettings);
+//		try 
+//		{
+//			FileWriter writer = new FileWriter(TorchieeeenessSettingsFile);
+//			writer.write(json);
+//			writer.close();
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//	}
 }
