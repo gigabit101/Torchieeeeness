@@ -26,37 +26,49 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
 public class TorchEventHandler 
 {
     private int[] slots = {8, 2, 3, 4, 5, 6, 7, 8, -1};
 	public static TorchieeeenessSettings torchieeeenessSettings;
-	private static File TorchieeeenessSettingsFile = new File(Minecraft.getMinecraft().mcDataDir, "TorchieeeenessSettings");
 	public static KeyBindings key;
+	private static File TorchieeeenessSettingsFile; //= new File(Minecraft.getMinecraft().mcDataDir, "TorchieeeenessSettings");
+	
+	public void generateJson()
+	{
+		if(Minecraft.getMinecraft() != null)
+		{
+			TorchieeeenessSettingsFile = new File(Minecraft.getMinecraft().mcDataDir, "TorchieeeenessSettings");
+		}
+	}
 	
     @SubscribeEvent
     public void playerInteractEventHandler(PlayerInteractEvent event)
     {
-    	load();
-        ItemStack heldItem = event.entityPlayer.inventory.getCurrentItem();
-        																
-    	if (key.config.isPressed() && event.action == Action.RIGHT_CLICK_AIR)
-		{
-    		load();
-    		if(torchieeeenessSettings.settings != 3)
-    			torchieeeenessSettings.settings++;
-    		if(torchieeeenessSettings.settings >= 3)
-    			torchieeeenessSettings.settings = 0;
-    		event.entityPlayer.addChatMessage(new ChatComponentText(StatCollector.translateToLocal("torchieeeeness_key" + torchieeeenessSettings.settings)));
-		
-			save();
-		}
-    	if(torchieeeenessSettings.settings != 0)
+		generateJson();
+    	if(event.world.isRemote)
     	{
-    		if(torchieeeenessSettings.settings == 1)
-    			placeAnything(event);
-    		if(torchieeeenessSettings.settings == 2)
-        		placeOnlyTorchs(event);
+        	ItemStack heldItem = event.entityPlayer.inventory.getCurrentItem();
+        																
+        	if (key.config.isPressed() && event.action == Action.RIGHT_CLICK_AIR)
+        	{
+        		load();
+        		if(torchieeeenessSettings.settings != 3)
+        			torchieeeenessSettings.settings++;
+        		if(torchieeeenessSettings.settings >= 3)
+        			torchieeeenessSettings.settings = 0;
+        		event.entityPlayer.addChatMessage(new ChatComponentText(StatCollector.translateToLocal("torchieeeeness_key" + torchieeeenessSettings.settings)));
+        		save();
+        	}
+        	if(torchieeeenessSettings.settings != 0)
+        	{
+        		if(torchieeeenessSettings.settings == 1)
+        			placeAnything(event);
+        		if(torchieeeenessSettings.settings == 2)
+        			placeOnlyTorchs(event);
+        	} 	
     	}
     }
     
@@ -68,6 +80,7 @@ public class TorchEventHandler
     		TorchHelper.placeTorch(heldItem, event.entityPlayer, event.world, event.x, event.y, event.z, event.face, 0.5f, 0.5f, 0.5f);
         }
     }
+    
     
     public void placeAnything(PlayerInteractEvent event)
     {
