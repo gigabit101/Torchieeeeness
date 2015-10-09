@@ -7,6 +7,7 @@ import net.minecraft.item.ItemPickaxe;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemTool;
 import net.minecraft.network.play.server.S2FPacketSetSlot;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.event.entity.item.ItemEvent;
@@ -68,7 +69,7 @@ public class TorchEventHandler
 //        	}
     	}
 
-        if(serverSetting != 0)
+        if(serverSetting != 0 && !(event.world.getTileEntity(event.x, event.y, event.z) instanceof TileEntity))
         {
         	if(serverSetting == 1)
         		placeAnything(event);
